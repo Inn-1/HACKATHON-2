@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MED+Search</title>
+
+  <!--
+    =====================================================
+    FONTS
+    We load two Google Fonts:
+      - "DM Sans"          → used for regular text
+      - "DM Serif Display" → used for big headings
+    =====================================================
+  -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
+
+    /* =====================================================
+       CSS VARIABLES
+    ===================================================== */
+    :root {
+      --navy:      #0d2045;   /* very dark blue */
+      --blue:      #1e4db7;   /* medium blue */
+      --bright:    #2563eb;   /* bright button blue */
+      --light-blue:#dbeafe;   /* pale blue for badges */
+      --pale:      #eff6ff;   /* very light blue background */
+      --white:     #ffffff;
+      --off-white: #f8faff;   /* slightly blue-tinted white */
+      --border:    #e2ecff;   /* border colour */
+      --text:      #0a1628;   /* almost-black text */
+      --muted:     #4a5e80;   /* grey-blue for secondary text */
+    }
+
+    /* =====================================================
+       RESET — removes default browser spacing so we
+       have full control over how everything looks
+    ===================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* =====================================================
+       LANGUAGE BAR — the dark strip at the very top
+       that holds the language buttons
+    ===================================================== */
+    .lang-bar {
+      background: #0a1628;
+      padding: 0 32px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end; /* push everything to the right */
+      gap: 4px;
+    }
+
+    .lang-bar span {
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-right: 8px;
+    }
+
+    /* Each language button */
+    .lang-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: #bfdbfe;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+
+    /* Highlight button when hovered */
+    .lang-btn:hover {
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    /* The currently-selected language button looks filled-in */
+    .lang-btn.active {
+      background: var(--bright);
+      border-color: var(--bright);
+      color: white;
+    }
+
+    /* =====================================================
+       HEADER — the big blue banner at the top
+    ===================================================== */
+    header {
+      background: linear-gradient(160deg, #0d2045, #1a3a7c, #1e4db7);
+      padding: 52px 32px 48px;
+    }
+
+    .header-inner {
+      max-width: 1000px;
+      margin: 0 auto; /* centre the content */
+    }
+
+    /* Small label above the main title */
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      margin-bottom: 14px;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem); /* scales with screen width */
+      color: white;
+      margin-bottom: 14px;
+      font-weight: 400;
+    }
+
+    header p {
+      font-size: 15px;
+      color: #bfdbfe;
+      max-width: 520px;
+      font-weight: 400;
+    }
+
+    /* =====================================================
+       EMERGENCY BANNER — the row of hotline buttons
+       below the header
+    ===================================================== */
+    .emergency-banner {
+      background: white;
+      border-bottom: 2px solid var(--light-blue);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .emergency-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 16px 32px;
+      display: flex;
+      flex-wrap: wrap;   /* wraps to next line on small screens */
+      gap: 10px;
+      align-items: center;
+    }
+
+    .emergency-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-right: 8px;
+    }
+
+    /* Each hotline box (e.g. "Emergency Services / 911") */
+    .hotline {
+      display: flex;
+      border: 1.5px solid var(--light-blue);
+      border-radius: 6px;
+      overflow: hidden; /* keeps the Call button corners rounded too */
+    }
+
+    .hotline-text {
+      padding: 7px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .hotline-text strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .hotline-text span {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* The "Call Now" button attached to each hotline */
+    .btn-call {
+      background: var(--bright);
+      color: white;
+      border: none;
+      padding: 0 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .btn-call:hover {
+      background: var(--blue);
+    }
+
+    /* =====================================================
+       MAIN CONTENT — centred wrapper for the search card
+       and results table
+    ===================================================== */
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 32px 80px;
+    }
+
+    /* Small uppercase label used above sections */
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bright);
+      margin-bottom: 10px;
+    }
+
+    /* =====================================================
+       SEARCH CARD — the white box with filters
+    ===================================================== */
+    .search-card {
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+
+    /* The row with the text input and Search button */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .search-row input {
+      flex: 1; /* stretches to fill available space */
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--off-white);
+      outline: none;
+    }
+
+    .search-row input:focus {
+      border-color: #3b82f6; /* highlight when user clicks it */
+      background: white;
+    }
+
+    .search-row input::placeholder {
+      color: var(--muted);
+    }
+
+    /* The blue "Search" button */
+    .btn-search {
+      background: var(--bright);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-search:hover {
+      background: var(--blue);
+    }
+
+    /* The row of dropdown filters */
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-row select {
+      flex: 1;
+      min-width: 150px;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--off-white);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .filter-row select:focus {
+      border-color: #3b82f6;
+    }
+
+    /* "Clear All Filters" link/button */
+    .reset-link {
+      font-size: 12.5px;
+      color: var(--muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      padding: 9px 0;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+
+    .reset-link:hover {
+      color: var(--bright);
+    }
+
+    /* =====================================================
+       RESULTS COUNT — "Showing 8 locations"
+    ===================================================== */
+    .results-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .results-count {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* =====================================================
+       RESULTS TABLE — the main table of healthcare places
+    ===================================================== */
+    .results-table-wrap {
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse; /* removes gaps between cells */
+    }
+
+    /* Header row of the table */
+    .results-table thead th {
+      background: var(--pale);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1.5px solid var(--light-blue);
+    }
+
+    /* Each data row */
+    .results-table tbody tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-table tbody tr:last-child {
+      border-bottom: none; /* no line after the last row */
+    }
+
+    .results-table tbody tr:hover {
+      background: var(--pale); /* light highlight on hover */
+    }
+
+    .results-table td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      font-size: 13.5px;
+    }
+
+    /* The location name and city below it */
+    .cell-name .name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .cell-name .city {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Coloured "type" badges like "Hospital" or "Walk-in Clinic" */
+    .type-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* Each badge type gets its own colour */
+    .badge-hospital      { background: var(--light-blue); color: var(--blue); }
+    .badge-walk-in       { background: #dbeafe;           color: #1e40af; }
+    .badge-mental-health { background: var(--pale);        color: var(--bright); border: 1px solid var(--light-blue); }
+    .badge-pharmacy      { background: #e0f2fe;            color: #0369a1; }
+
+    /* Distance cell (blue text) */
+    .cell-dist {
+      color: var(--bright);
+      font-weight: 600;
+    }
+
+    /* Accessibility pills like "Wheelchair Access" */
+    .access-pill {
+      display: inline-block;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--blue);
+      background: var(--pale);
+      border: 1px solid var(--light-blue);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin: 2px 2px 2px 0;
+    }
+
+    /* The "Call" phone button in each row */
+    .btn-phone {
+      display: inline-block;
+      border: 1.5px solid #93c5fd;
+      color: var(--bright);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-phone:hover {
+      background: var(--bright);
+      color: white;
+      border-color: var(--bright);
+    }
+
+    /* The "Compare" checkbox label under the call button */
+    .compare-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .compare-label input {
+      accent-color: var(--bright);
+      cursor: pointer;
+    }
+
+    /* Message shown when no results match the filters */
+    .no-results {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .no-results strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    /* =====================================================
+       COMPARE SECTION — shown when 2 locations are checked
+    ===================================================== */
+    .compare-section {
+      display: none; /* hidden by default; JS shows it */
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--light-blue);
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-top: 28px;
+    }
+
+    /* Side-by-side comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin-top: 16px;
+    }
+
+    .compare-table th {
+      background: var(--pale);
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 11px 16px;
+      text-align: left;
+      border-bottom: 2px solid var(--light-blue);
+    }
+
+    .compare-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* First column (row labels like "Type", "Distance") */
+    .compare-table td:first-child {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      width: 130px;
+    }
+
+    /* =====================================================
+       FOOTER — the dark bar at the bottom
+    ===================================================== */
+    footer {
+      background: #0a1628;
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #93c5fd;
+    }
+
+    /* =====================================================
+       RESPONSIVE — on small screens, hide table headers
+       and stack cells vertically instead
+    ===================================================== */
+    @media (max-width: 700px) {
+      header, main         { padding-left: 16px; padding-right: 16px; }
+      .lang-bar            { padding: 0 16px; }
+      .emergency-inner     { padding: 12px 16px; }
+      .search-row          { flex-direction: column; }
+      .filter-row select   { min-width: 100%; }
+      .results-table thead { display: none; }
+      .results-table tbody tr { display: block; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+      .results-table td    { display: block; padding: 3px 0; border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================
+       LANGUAGE BAR
+       Clicking a button calls setLang() with the language code.
+  ===================================================== -->
+  <div class="lang-bar">
+    <span data-i18n="lang-select">Language:</span>
+    <button class="lang-btn active" onclick="setLang('en')">English</button>
+    <button class="lang-btn"        onclick="setLang('fr')">Français</button>
+    <button class="lang-btn"        onclick="setLang('zh')">中文</button>
+    <button class="lang-btn"        onclick="setLang('hi')">हिन्दी</button>
+    <button class="lang-btn"        onclick="setLang('pa')">ਪੰਜਾਬੀ</button>
+    <button class="lang-btn"        onclick="setLang('es')">Español</button>
+  </div>
+
+  <!-- =====================================================
+       HEADER
+  ===================================================== -->
+  <header>
+    <div class="header-inner">
+      <div class="eyebrow" data-i18n="eyebrow">Health Services Directory — Canada</div>
+      <h1 data-i18n="h1">MED+Search</h1>
+      <p data-i18n="subhead">Locate hospitals, walk-in clinics, mental health resources, and pharmacies near you — anywhere in Canada.</p>
+    </div>
+  </header>
+
+  <!-- =====================================================
+       EMERGENCY BANNER
+       Each hotline has a text block and a "Call Now" link.
+  ===================================================== -->
+  <div class="emergency-banner">
+    <div class="emergency-inner">
+      <span class="emergency-label" data-i18n="emergency-label">Emergency Contacts</span>
+
+      <div class="hotline">
+        <div class="hotline-text">
+          <strong data-i18n="h-emergency">Emergency Services</strong>
+          <span>911</span>
+        </div>
+        <a href="tel:911" class="btn-call" data-i18n="call-now">Call Now</a>
+      </div>
+
+      <div class="hotline">
+        <div class="hotline-text">
+          <strong data-i18n="h-mental">Mental Health Crisis</strong>
+          <span data-i18n="h-mental-sub">Call or Text 988</span>
+        </div>
+        <a href="tel:988" class="btn-call" data-i18n="call-now2">Call Now</a>
+      </div>
+
+      <div class="hotline">
+        <div class="hotline-text">
+          <strong data-i18n="h-poison">Poison Control</strong>
+          <span>1-800-268-9017</span>
+        </div>
+        <a href="tel:18002689017" class="btn-call" data-i18n="call-now3">Call Now</a>
+      </div>
+
+      <div class="hotline">
+        <div class="hotline-text">
+          <strong data-i18n="h-kids">Kids Help Phone</strong>
+          <span>1-800-668-6868</span>
+        </div>
+        <a href="tel:18006686868" class="btn-call" data-i18n="call-now4">Call Now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       MAIN CONTENT
+  ===================================================== -->
+  <main>
+
+    <!-- Search Card -->
+    <div class="search-card">
+      <div class="section-label" data-i18n="search-label">Find Healthcare Near You</div>
+
+      <!-- City search input + Search button -->
+      <div class="search-row">
+        <input
+          type="text"
+          id="locationInput"
+          placeholder="Enter your city (e.g. Toronto, Vancouver, Montréal)"
+          data-i18n-ph="search-ph"
+        />
+        <button class="btn-search" onclick="applyFilters()" data-i18n="search-btn">Search</button>
+      </div>
+
+      <!-- Four dropdown filters + Clear button -->
+      <div class="filter-row">
+        <select id="filterType" onchange="applyFilters()">
+          <option value=""              data-i18n="f-all-types">All Types</option>
+          <option value="hospital"      data-i18n="f-hospital">Hospital</option>
+          <option value="walk-in"       data-i18n="f-walkin">Walk-in Clinic</option>
+          <option value="mental-health" data-i18n="f-mental">Mental Health</option>
+          <option value="pharmacy"      data-i18n="f-pharmacy">Pharmacy</option>
+        </select>
+
+        <select id="filterDistance" onchange="applyFilters()">
+          <option value=""  data-i18n="f-any-dist">Any Distance</option>
+          <option value="5"  data-i18n="f-5km">Within 5 km</option>
+          <option value="10" data-i18n="f-10km">Within 10 km</option>
+          <option value="20" data-i18n="f-20km">Within 20 km</option>
+        </select>
+
+        <select id="filterLang" onchange="applyFilters()">
+          <option value="">Any Language</option>
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="Mandarin">Mandarin</option>
+          <option value="Punjabi">Punjabi</option>
+          <option value="Spanish">Spanish</option>
+        </select>
+
+        <select id="filterAccess" onchange="applyFilters()">
+          <option value=""           data-i18n="f-any-access">Any Accessibility</option>
+          <option value="wheelchair" data-i18n="f-wheelchair">Wheelchair Access</option>
+          <option value="parking"    data-i18n="f-parking">Accessible Parking</option>
+        </select>
+
+        <button class="reset-link" onclick="resetFilters()" data-i18n="reset">Clear All Filters</button>
+      </div>
+    </div>
+
+    <!-- Shows how many results are visible -->
+    <div class="results-bar">
+      <div class="results-count" id="resultsCount">Showing all 8 locations</div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="results-table-wrap">
+      <table class="results-table" id="resultsTable">
+        <thead>
+          <tr>
+            <th data-i18n="col-name">Name</th>
+            <th data-i18n="col-type">Type</th>
+            <th data-i18n="col-dist">Distance</th>
+            <th data-i18n="col-wait">Wait Time</th>
+            <th data-i18n="col-langs">Languages</th>
+            <th data-i18n="col-access">Accessibility</th>
+            <th data-i18n="col-contact">Contact</th>
+          </tr>
+        </thead>
+        <!-- Rows are generated by JavaScript below -->
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Compare Section (hidden until 2 locations are checked) -->
+    <div class="compare-section" id="compareSection">
+      <div class="section-label" data-i18n="compare-label">Side-by-Side Comparison</div>
+      <table class="compare-table" id="compareTable"></table>
+    </div>
+
+  </main>
+
+
+<!--FOOTER-->
+
+  <footer>
+    <p data-i18n="footer">Health Access Finder — Canada &nbsp;|&nbsp; This is a demonstration project. Always call 911 in an emergency.</p>
+  </footer>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+       This section makes the page interactive.
+  ===================================================== -->
+  <script>
+
+    /* -------------------------------------------------------
+       1. DATA
+       This is the list of healthcare locations we display.
+       Each location is an object with properties like name,
+       type, city, distance, etc.
+    ------------------------------------------------------- */
+    var locations = [
+      {
+        id: 1,
+        name: "Toronto General Hospital",
+        type: "hospital",
+        city: "Toronto",
+        distance: 2.3,
+        waitTime: "45 min",
+        languages: ["English", "French", "Mandarin"],
+        accessibility: ["wheelchair", "parking"],
+        phone: "416-340-4800"
+      },
+      {
+        id: 2,
+        name: "Vancouver Walk-in Clinic",
+        type: "walk-in",
+        city: "Vancouver",
+        distance: 1.1,
+        waitTime: "20 min",
+        languages: ["English", "Mandarin", "Punjabi"],
+        accessibility: ["wheelchair"],
+        phone: "604-555-0192"
+      },
+      {
+        id: 3,
+        name: "CAMH – Centre for Addiction & Mental Health",
+        type: "mental-health",
+        city: "Toronto",
+        distance: 3.7,
+        waitTime: "By appointment",
+        languages: ["English", "French", "Spanish"],
+        accessibility: ["wheelchair", "parking"],
+        phone: "416-535-8501"
+      },
+      {
+        id: 4,
+        name: "Montréal General Hospital",
+        type: "hospital",
+        city: "Montréal",
+        distance: 4.9,
+        waitTime: "1 hr 10 min",
+        languages: ["English", "French"],
+        accessibility: ["wheelchair", "parking"],
+        phone: "514-934-1934"
+      },
+      {
+        id: 5,
+        name: "Shoppers Drug Mart Pharmacy",
+        type: "pharmacy",
+        city: "Calgary",
+        distance: 0.8,
+        waitTime: "5 min",
+        languages: ["English"],
+        accessibility: ["wheelchair"],
+        phone: "403-555-0134"
+      },
+      {
+        id: 6,
+        name: "Edmonton QuickCare Clinic",
+        type: "walk-in",
+        city: "Edmonton",
+        distance: 8.2,
+        waitTime: "35 min",
+        languages: ["English", "Punjabi"],
+        accessibility: ["parking"],
+        phone: "780-555-0271"
+      },
+      {
+        id: 7,
+        name: "Ottawa Mental Wellness Centre",
+        type: "mental-health",
+        city: "Ottawa",
+        distance: 6.5,
+        waitTime: "By appointment",
+        languages: ["English", "French"],
+        accessibility: ["wheelchair"],
+        phone: "613-555-0388"
+      },
+      {
+        id: 8,
+        name: "Winnipeg Children's Hospital",
+        type: "hospital",
+        city: "Winnipeg",
+        distance: 11.4,
+        waitTime: "55 min",
+        languages: ["English", "French", "Spanish"],
+        accessibility: ["wheelchair", "parking"],
+        phone: "204-787-2100"
+      }
+    ];
+
+    /* -------------------------------------------------------
+       2. TRANSLATIONS
+       This object holds text in different languages.
+       When the user picks a language, we look up the key here.
+       Keys like "h1" match the data-i18n="h1" attributes in HTML.
+    ------------------------------------------------------- */
+    var translations = {
+      en: {
+        "eyebrow": "Health Services Directory — Canada",
+        "h1": "Health Access Finder",
+        "subhead": "Locate hospitals, walk-in clinics, mental health resources, and pharmacies near you — anywhere in Canada.",
+        "lang-select": "Language:",
+        "emergency-label": "Emergency Contacts",
+        "h-emergency": "Emergency Services",
+        "h-mental": "Mental Health Crisis",
+        "h-mental-sub": "Call or Text 988",
+        "h-poison": "Poison Control",
+        "h-kids": "Kids Help Phone",
+        "call-now": "Call Now", "call-now2": "Call Now", "call-now3": "Call Now", "call-now4": "Call Now",
+        "search-label": "Find Healthcare Near You",
+        "search-ph": "Enter your city (e.g. Toronto, Vancouver, Montréal)",
+        "search-btn": "Search",
+        "f-all-types": "All Types", "f-hospital": "Hospital", "f-walkin": "Walk-in Clinic",
+        "f-mental": "Mental Health", "f-pharmacy": "Pharmacy",
+        "f-any-dist": "Any Distance", "f-5km": "Within 5 km", "f-10km": "Within 10 km", "f-20km": "Within 20 km",
+        "f-any-lang": "Any Language", "f-any-access": "Any Accessibility",
+        "f-wheelchair": "Wheelchair Access", "f-parking": "Accessible Parking",
+        "reset": "Clear All Filters",
+        "col-name": "Name", "col-type": "Type", "col-dist": "Distance", "col-wait": "Wait Time",
+        "col-langs": "Languages", "col-access": "Accessibility", "col-contact": "Contact",
+        "compare-label": "Side-by-Side Comparison",
+        "compare-btn": "Compare",
+        "type-lbl": "Type", "dist-lbl": "Distance", "wait-lbl": "Wait Time",
+        "langs-lbl": "Languages", "access-lbl": "Accessibility", "phone-lbl": "Phone",
+        "badge-hospital": "Hospital", "badge-walk-in": "Walk-in Clinic",
+        "badge-mental-health": "Mental Health", "badge-pharmacy": "Pharmacy",
+        "access-wheelchair": "Wheelchair Access", "access-parking": "Accessible Parking",
+        "call-btn": "Call",
+        "no-results-title": "No locations found",
+        "no-results-sub": "Try adjusting your search criteria.",
+        "showing": "Showing", "locations": "locations", "location": "location",
+        "footer": "Health Access Finder — Canada | This is a demonstration project. Always call 911 in an emergency."
+      },
+      fr: {
+        "eyebrow": "Répertoire des services de santé — Canada",
+        "h1": "Trouver des soins de santé",
+        "subhead": "Trouvez des hôpitaux, des cliniques sans rendez-vous, des ressources en santé mentale et des pharmacies près de chez vous.",
+        "lang-select": "Langue :",
+        "emergency-label": "Contacts d'urgence",
+        "h-emergency": "Services d'urgence",
+        "h-mental": "Crise de santé mentale", "h-mental-sub": "Appeler ou texter le 988",
+        "h-poison": "Centre antipoison", "h-kids": "Jeunesse, J'écoute",
+        "call-now": "Appeler", "call-now2": "Appeler", "call-now3": "Appeler", "call-now4": "Appeler",
+        "search-label": "Trouvez des soins près de vous",
+        "search-ph": "Entrez votre ville (ex. Toronto, Vancouver, Montréal)",
+        "search-btn": "Rechercher",
+        "f-all-types": "Tous les types", "f-hospital": "Hôpital", "f-walkin": "Clinique sans rendez-vous",
+        "f-mental": "Santé mentale", "f-pharmacy": "Pharmacie",
+        "f-any-dist": "Toute distance", "f-5km": "Moins de 5 km", "f-10km": "Moins de 10 km", "f-20km": "Moins de 20 km",
+        "f-any-lang": "Toute langue", "f-any-access": "Tout accès",
+        "f-wheelchair": "Accès fauteuil roulant", "f-parking": "Stationnement accessible",
+        "reset": "Effacer tous les filtres",
+        "col-name": "Nom", "col-type": "Type", "col-dist": "Distance", "col-wait": "Temps d'attente",
+        "col-langs": "Langues", "col-access": "Accessibilité", "col-contact": "Contact",
+        "compare-label": "Comparaison côte à côte",
+        "compare-btn": "Comparer",
+        "type-lbl": "Type", "dist-lbl": "Distance", "wait-lbl": "Attente",
+        "langs-lbl": "Langues", "access-lbl": "Accès", "phone-lbl": "Téléphone",
+        "badge-hospital": "Hôpital", "badge-walk-in": "Clinique sans RDV",
+        "badge-mental-health": "Santé mentale", "badge-pharmacy": "Pharmacie",
+        "access-wheelchair": "Fauteuil roulant", "access-parking": "Stationnement",
+        "call-btn": "Appeler",
+        "no-results-title": "Aucun résultat", "no-results-sub": "Essayez de modifier vos critères.",
+        "showing": "Affichage de", "locations": "emplacements", "location": "emplacement",
+        "footer": "Trouver soins de santé — Canada | Projet de démonstration. Appelez toujours le 911 en cas d'urgence."
+      },
+      zh: {
+        "eyebrow": "医疗服务目录 — 加拿大",
+        "h1": "医疗资源查找器",
+        "subhead": "在加拿大任何地方找到附近的医院、免预约诊所、心理健康资源和药房。",
+        "lang-select": "语言：",
+        "emergency-label": "紧急联系方式",
+        "h-emergency": "紧急服务", "h-mental": "心理健康危机", "h-mental-sub": "拨打或发短信至 988",
+        "h-poison": "毒物控制中心", "h-kids": "儿童帮助热线",
+        "call-now": "立即拨打", "call-now2": "立即拨打", "call-now3": "立即拨打", "call-now4": "立即拨打",
+        "search-label": "在您附近查找医疗服务",
+        "search-ph": "输入您所在城市（如 多伦多、温哥华、蒙特利尔）",
+        "search-btn": "搜索",
+        "f-all-types": "所有类型", "f-hospital": "医院", "f-walkin": "免预约诊所",
+        "f-mental": "心理健康", "f-pharmacy": "药房",
+        "f-any-dist": "任意距离", "f-5km": "5公里内", "f-10km": "10公里内", "f-20km": "20公里内",
+        "f-any-lang": "任意语言", "f-any-access": "任意无障碍",
+        "f-wheelchair": "轮椅通道", "f-parking": "无障碍停车",
+        "reset": "清除所有筛选",
+        "col-name": "名称", "col-type": "类型", "col-dist": "距离", "col-wait": "等待时间",
+        "col-langs": "语言", "col-access": "无障碍设施", "col-contact": "联系方式",
+        "compare-label": "并排比较", "compare-btn": "比较",
+        "type-lbl": "类型", "dist-lbl": "距离", "wait-lbl": "等待",
+        "langs-lbl": "语言", "access-lbl": "无障碍", "phone-lbl": "电话",
+        "badge-hospital": "医院", "badge-walk-in": "免预约诊所",
+        "badge-mental-health": "心理健康", "badge-pharmacy": "药房",
+        "access-wheelchair": "轮椅通道", "access-parking": "无障碍停车",
+        "call-btn": "拨打",
+        "no-results-title": "未找到相关地点", "no-results-sub": "请尝试调整您的搜索条件。",
+        "showing": "显示", "locations": "个地点", "location": "个地点",
+        "footer": "医疗资源查找器 — 加拿大 | 演示项目。紧急情况请拨打 911。"
+      },
+      hi: {
+        "eyebrow": "स्वास्थ्य सेवा निर्देशिका — कनाडा",
+        "h1": "स्वास्थ्य सेवा खोजकर्ता",
+        "subhead": "कनाडा में कहीं भी अपने निकट अस्पताल, वॉक-इन क्लीनिक, मानसिक स्वास्थ्य संसाधन और फार्मेसी खोजें।",
+        "lang-select": "भाषा:",
+        "emergency-label": "आपातकालीन संपर्क",
+        "h-emergency": "आपातकालीन सेवाएं", "h-mental": "मानसिक स्वास्थ्य संकट", "h-mental-sub": "988 पर कॉल या टेक्स्ट करें",
+        "h-poison": "विष नियंत्रण केंद्र", "h-kids": "बच्चों की सहायता लाइन",
+        "call-now": "अभी कॉल करें", "call-now2": "अभी कॉल करें", "call-now3": "अभी कॉल करें", "call-now4": "अभी कॉल करें",
+        "search-label": "अपने पास स्वास्थ्य सेवा खोजें",
+        "search-ph": "अपना शहर दर्ज करें (जैसे टोरंटो, वैंकूवर)",
+        "search-btn": "खोजें",
+        "f-all-types": "सभी प्रकार", "f-hospital": "अस्पताल", "f-walkin": "वॉक-इन क्लीनिक",
+        "f-mental": "मानसिक स्वास्थ्य", "f-pharmacy": "फार्मेसी",
+        "f-any-dist": "कोई भी दूरी", "f-5km": "5 किमी के भीतर", "f-10km": "10 किमी के भीतर", "f-20km": "20 किमी के भीतर",
+        "f-any-lang": "कोई भी भाषा", "f-any-access": "कोई भी पहुंच",
+        "f-wheelchair": "व्हीलचेयर पहुंच", "f-parking": "सुलभ पार्किंग",
+        "reset": "सभी फ़िल्टर साफ़ करें",
+        "col-name": "नाम", "col-type": "प्रकार", "col-dist": "दूरी", "col-wait": "प्रतीक्षा समय",
+        "col-langs": "भाषाएं", "col-access": "पहुंच", "col-contact": "संपर्क",
+        "compare-label": "तुलना", "compare-btn": "तुलना करें",
+        "type-lbl": "प्रकार", "dist-lbl": "दूरी", "wait-lbl": "प्रतीक्षा",
+        "langs-lbl": "भाषाएं", "access-lbl": "पहुंच", "phone-lbl": "फ़ोन",
+        "badge-hospital": "अस्पताल", "badge-walk-in": "वॉक-इन क्लीनिक",
+        "badge-mental-health": "मानसिक स्वास्थ्य", "badge-pharmacy": "फार्मेसी",
+        "access-wheelchair": "व्हीलचेयर", "access-parking": "पार्किंग",
+        "call-btn": "कॉल करें",
+        "no-results-title": "कोई स्थान नहीं मिला", "no-results-sub": "अपनी खोज मानदंड बदलने का प्रयास करें।",
+        "showing": "दिखाया जा रहा है", "locations": "स्थान", "location": "स्थान",
+        "footer": "स्वास्थ्य सेवा खोजकर्ता — कनाडा | यह एक प्रदर्शन परियोजना है। आपात स्थिति में हमेशा 911 पर कॉल करें।"
+      },
+      pa: {
+        "eyebrow": "ਸਿਹਤ ਸੇਵਾਵਾਂ ਡਾਇਰੈਕਟਰੀ — ਕੈਨੇਡਾ",
+        "h1": "ਸਿਹਤ ਸੇਵਾ ਖੋਜਕਾਰ",
+        "subhead": "ਕੈਨੇਡਾ ਵਿੱਚ ਕਿਤੇ ਵੀ ਨੇੜੇ ਹਸਪਤਾਲ, ਵਾਕ-ਇਨ ਕਲੀਨਿਕ, ਮਾਨਸਿਕ ਸਿਹਤ ਸਰੋਤ ਅਤੇ ਫਾਰਮੇਸੀ ਲੱਭੋ।",
+        "lang-select": "ਭਾਸ਼ਾ:",
+        "emergency-label": "ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ",
+        "h-emergency": "ਐਮਰਜੈਂਸੀ ਸੇਵਾਵਾਂ", "h-mental": "ਮਾਨਸਿਕ ਸਿਹਤ ਸੰਕਟ", "h-mental-sub": "988 'ਤੇ ਕਾਲ ਜਾਂ ਟੈਕਸਟ ਕਰੋ",
+        "h-poison": "ਜ਼ਹਿਰ ਕੰਟਰੋਲ", "h-kids": "ਬੱਚਿਆਂ ਦੀ ਮਦਦ ਲਾਈਨ",
+        "call-now": "ਹੁਣੇ ਕਾਲ ਕਰੋ", "call-now2": "ਹੁਣੇ ਕਾਲ ਕਰੋ", "call-now3": "ਹੁਣੇ ਕਾਲ ਕਰੋ", "call-now4": "ਹੁਣੇ ਕਾਲ ਕਰੋ",
+        "search-label": "ਨੇੜੇ ਸਿਹਤ ਸੇਵਾ ਲੱਭੋ",
+        "search-ph": "ਆਪਣਾ ਸ਼ਹਿਰ ਦਰਜ ਕਰੋ (ਜਿਵੇਂ ਟੋਰੰਟੋ, ਵੈਨਕੂਵਰ)",
+        "search-btn": "ਖੋਜੋ",
+        "f-all-types": "ਸਾਰੇ ਪ੍ਰਕਾਰ", "f-hospital": "ਹਸਪਤਾਲ", "f-walkin": "ਵਾਕ-ਇਨ ਕਲੀਨਿਕ",
+        "f-mental": "ਮਾਨਸਿਕ ਸਿਹਤ", "f-pharmacy": "ਫਾਰਮੇਸੀ",
+        "f-any-dist": "ਕੋਈ ਵੀ ਦੂਰੀ", "f-5km": "5 ਕਿਮੀ ਅੰਦਰ", "f-10km": "10 ਕਿਮੀ ਅੰਦਰ", "f-20km": "20 ਕਿਮੀ ਅੰਦਰ",
+        "f-any-lang": "ਕੋਈ ਵੀ ਭਾਸ਼ਾ", "f-any-access": "ਕੋਈ ਵੀ ਪਹੁੰਚ",
+        "f-wheelchair": "ਵ੍ਹੀਲਚੇਅਰ ਪਹੁੰਚ", "f-parking": "ਪਹੁੰਚਯੋਗ ਪਾਰਕਿੰਗ",
+        "reset": "ਸਾਰੇ ਫਿਲਟਰ ਸਾਫ਼ ਕਰੋ",
+        "col-name": "ਨਾਮ", "col-type": "ਪ੍ਰਕਾਰ", "col-dist": "ਦੂਰੀ", "col-wait": "ਉਡੀਕ ਸਮਾਂ",
+        "col-langs": "ਭਾਸ਼ਾਵਾਂ", "col-access": "ਪਹੁੰਚ", "col-contact": "ਸੰਪਰਕ",
+        "compare-label": "ਤੁਲਨਾ", "compare-btn": "ਤੁਲਨਾ ਕਰੋ",
+        "type-lbl": "ਪ੍ਰਕਾਰ", "dist-lbl": "ਦੂਰੀ", "wait-lbl": "ਉਡੀਕ",
+        "langs-lbl": "ਭਾਸ਼ਾਵਾਂ", "access-lbl": "ਪਹੁੰਚ", "phone-lbl": "ਫ਼ੋਨ",
+        "badge-hospital": "ਹਸਪਤਾਲ", "badge-walk-in": "ਵਾਕ-ਇਨ ਕਲੀਨਿਕ",
+        "badge-mental-health": "ਮਾਨਸਿਕ ਸਿਹਤ", "badge-pharmacy": "ਫਾਰਮੇਸੀ",
+        "access-wheelchair": "ਵ੍ਹੀਲਚੇਅਰ", "access-parking": "ਪਾਰਕਿੰਗ",
+        "call-btn": "ਕਾਲ ਕਰੋ",
+        "no-results-title": "ਕੋਈ ਥਾਂ ਨਹੀਂ ਮਿਲੀ", "no-results-sub": "ਆਪਣੇ ਖੋਜ ਮਾਪਦੰਡ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+        "showing": "ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ", "locations": "ਥਾਵਾਂ", "location": "ਥਾਂ",
+        "footer": "ਸਿਹਤ ਸੇਵਾ ਖੋਜਕਾਰ — ਕੈਨੇਡਾ | ਇਹ ਇੱਕ ਪ੍ਰਦਰਸ਼ਨੀ ਪ੍ਰੋਜੈਕਟ ਹੈ। ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਹਮੇਸ਼ਾ 911 'ਤੇ ਕਾਲ ਕਰੋ।"
+      },
+      es: {
+        "eyebrow": "Directorio de Servicios de Salud — Canadá",
+        "h1": "Buscador de Atención Médica",
+        "subhead": "Encuentre hospitales, clínicas sin cita, recursos de salud mental y farmacias cerca de usted en cualquier lugar de Canadá.",
+        "lang-select": "Idioma:",
+        "emergency-label": "Contactos de Emergencia",
+        "h-emergency": "Servicios de Emergencia", "h-mental": "Crisis de Salud Mental", "h-mental-sub": "Llame o envíe un mensaje al 988",
+        "h-poison": "Control de Intoxicaciones", "h-kids": "Línea de Ayuda Infantil",
+        "call-now": "Llamar", "call-now2": "Llamar", "call-now3": "Llamar", "call-now4": "Llamar",
+        "search-label": "Encuentre atención médica cercana",
+        "search-ph": "Ingrese su ciudad (ej. Toronto, Vancouver, Montréal)",
+        "search-btn": "Buscar",
+        "f-all-types": "Todos los tipos", "f-hospital": "Hospital", "f-walkin": "Clínica sin cita",
+        "f-mental": "Salud mental", "f-pharmacy": "Farmacia",
+        "f-any-dist": "Cualquier distancia", "f-5km": "Dentro de 5 km", "f-10km": "Dentro de 10 km", "f-20km": "Dentro de 20 km",
+        "f-any-lang": "Cualquier idioma", "f-any-access": "Cualquier acceso",
+        "f-wheelchair": "Acceso en silla de ruedas", "f-parking": "Estacionamiento accesible",
+        "reset": "Borrar todos los filtros",
+        "col-name": "Nombre", "col-type": "Tipo", "col-dist": "Distancia", "col-wait": "Tiempo de espera",
+        "col-langs": "Idiomas", "col-access": "Accesibilidad", "col-contact": "Contacto",
+        "compare-label": "Comparación lado a lado", "compare-btn": "Comparar",
+        "type-lbl": "Tipo", "dist-lbl": "Distancia", "wait-lbl": "Espera",
+        "langs-lbl": "Idiomas", "access-lbl": "Acceso", "phone-lbl": "Teléfono",
+        "badge-hospital": "Hospital", "badge-walk-in": "Clínica sin cita",
+        "badge-mental-health": "Salud mental", "badge-pharmacy": "Farmacia",
+        "access-wheelchair": "Silla de ruedas", "access-parking": "Estacionamiento",
+        "call-btn": "Llamar",
+        "no-results-title": "No se encontraron ubicaciones", "no-results-sub": "Intente ajustar sus criterios de búsqueda.",
+        "showing": "Mostrando", "locations": "ubicaciones", "location": "ubicación",
+        "footer": "Buscador de Atención Médica — Canadá | Proyecto de demostración. Siempre llame al 911 en caso de emergencia."
+      }
+    };
+
+    /* -------------------------------------------------------
+       3. STATE VARIABLES
+       These track what's happening in the app right now.
+    ------------------------------------------------------- */
+
+    // Which language is currently active? Start with English.
+    var currentLang = 'en';
+
+    // Which location IDs has the user checked for comparison?
+    // This is an array that can hold up to 2 IDs.
+    var compareList = [];
+
+    /* -------------------------------------------------------
+       4. HELPER FUNCTIONS
+       Small reusable functions used by the bigger ones below.
+    ------------------------------------------------------- */
+
+    // Look up a translated string by its key.
+    // If the current language doesn't have it, fall back to English.
+    function getText(key) {
+      var langData = translations[currentLang];
+      return langData[key] || translations['en'][key] || key;
+    }
+
+    // Return the CSS class name for a badge based on type.
+    // e.g. "hospital" → "badge-hospital"
+    function getBadgeClass(type) {
+      var classes = {
+        'hospital':      'badge-hospital',
+        'walk-in':       'badge-walk-in',
+        'mental-health': 'badge-mental-health',
+        'pharmacy':      'badge-pharmacy'
+      };
+      return classes[type] || '';
+    }
+
+    // Return the translated label for a type.
+    // e.g. in French, "hospital" → "Hôpital"
+    function getTypeLabel(type) {
+      return getText('badge-' + type);
+    }
+
+    // Return the translated label for an accessibility feature.
+    // e.g. "wheelchair" → "Wheelchair Access"
+    function getAccessLabel(accessKey) {
+      return getText('access-' + accessKey);
+    }
+
+    /* -------------------------------------------------------
+       5. RENDER TABLE
+       This function takes an array of location objects and
+       draws them as rows inside the <tbody id="tableBody">.
+    ------------------------------------------------------- */
+    function renderTable(list) {
+      var tbody = document.getElementById('tableBody');
+      var countEl = document.getElementById('resultsCount');
+
+      // If nothing matches, show a "no results" message
+      if (list.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="7" class="no-results">' +
+            '<strong>' + getText('no-results-title') + '</strong>' +
+            getText('no-results-sub') +
+          '</td></tr>';
+        countEl.textContent = getText('no-results-title');
+        return;
+      }
+
+      // Update the "Showing X locations" text
+      var word = list.length === 1 ? getText('location') : getText('locations');
+      countEl.textContent = getText('showing') + ' ' + list.length + ' ' + word;
+
+      // Build the HTML for all rows by going through each location
+      var rowsHTML = '';
+      for (var i = 0; i < list.length; i++) {
+        var loc = list[i];
+        rowsHTML += buildRow(loc);
+      }
+      tbody.innerHTML = rowsHTML;
+    }
+
+    /* -------------------------------------------------------
+       6. BUILD A SINGLE ROW
+       Given one location object, return the HTML string
+       for a <tr> table row.
+    ------------------------------------------------------- */
+    function buildRow(loc) {
+      // Build accessibility pills (e.g. "Wheelchair Access")
+      var accessHTML = '';
+      for (var i = 0; i < loc.accessibility.length; i++) {
+        accessHTML += '<span class="access-pill">' + getAccessLabel(loc.accessibility[i]) + '</span>';
+      }
+
+      // Is this location currently checked for comparison?
+      var isChecked = compareList.indexOf(loc.id) !== -1;
+
+      return (
+        '<tr>' +
+          '<td class="cell-name">' +
+            '<div class="name">' + loc.name + '</div>' +
+            '<div class="city">' + loc.city + '</div>' +
+          '</td>' +
+          '<td>' +
+            '<span class="type-badge ' + getBadgeClass(loc.type) + '">' +
+              getTypeLabel(loc.type) +
+            '</span>' +
+          '</td>' +
+          '<td class="cell-dist">' + loc.distance + ' km</td>' +
+          '<td>' + loc.waitTime + '</td>' +
+          '<td style="color:var(--muted);font-size:13px">' + loc.languages.join(', ') + '</td>' +
+          '<td>' + accessHTML + '</td>' +
+          '<td>' +
+            '<a href="tel:' + loc.phone + '" class="btn-phone">' +
+              getText('call-btn') + ' ' + loc.phone +
+            '</a>' +
+            '<label class="compare-label">' +
+              '<input type="checkbox" ' +
+                'onchange="handleCompare(' + loc.id + ', this.checked)" ' +
+                (isChecked ? 'checked' : '') + ' />' +
+              getText('compare-btn') +
+            '</label>' +
+          '</td>' +
+        '</tr>'
+      );
+    }
+
+    /* -------------------------------------------------------
+       7. APPLY FILTERS
+       Reads the current values from all four dropdowns,
+       then filters the locations array and re-renders the table.
+    ------------------------------------------------------- */
+    function applyFilters() {
+      var typeFilter     = document.getElementById('filterType').value;
+      var distanceFilter = document.getElementById('filterDistance').value;
+      var langFilter     = document.getElementById('filterLang').value;
+      var accessFilter   = document.getElementById('filterAccess').value;
+
+      // Go through every location and keep only the ones that pass all filters
+      var filtered = [];
+      for (var i = 0; i < locations.length; i++) {
+        var loc = locations[i];
+
+        // Skip if type doesn't match (empty string means "any")
+        if (typeFilter && loc.type !== typeFilter) continue;
+
+        // Skip if distance is over the selected maximum
+        if (distanceFilter && loc.distance > parseInt(distanceFilter)) continue;
+
+        // Skip if this location doesn't offer the chosen language
+        // .indexOf() returns -1 if the item is NOT in the array
+        if (langFilter && loc.languages.indexOf(langFilter) === -1) continue;
+
+        // Skip if this location doesn't have the chosen accessibility feature
+        if (accessFilter && loc.accessibility.indexOf(accessFilter) === -1) continue;
+
+        // All checks passed — include this location
+        filtered.push(loc);
+      }
+
+      renderTable(filtered);
+    }
+
+    /* -------------------------------------------------------
+       8. RESET FILTERS
+       Clears all inputs and shows the full location list again.
+    ------------------------------------------------------- */
+    function resetFilters() {
+      document.getElementById('locationInput').value = '';
+      document.getElementById('filterType').value     = '';
+      document.getElementById('filterDistance').value = '';
+      document.getElementById('filterLang').value     = '';
+      document.getElementById('filterAccess').value   = '';
+      compareList = [];
+      renderTable(locations);
+      updateCompareSection();
+    }
+
+    /* -------------------------------------------------------
+       9. COMPARE LOGIC
+       Called when the user checks/unchecks a "Compare" checkbox.
+       We allow a maximum of 2 locations to be compared at once.
+    ------------------------------------------------------- */
+    function handleCompare(id, isChecked) {
+      if (isChecked) {
+        // Only allow up to 2 locations
+        if (compareList.length >= 2) {
+          alert('You can only compare 2 locations at a time. Please deselect one first.');
+          // Un-check the box (because we rejected the addition)
+          document.getElementById('compare-' + id).checked = false;
+          return;
+        }
+        compareList.push(id);
+      } else {
+        // Remove this id from the compareList
+        var newList = [];
+        for (var i = 0; i < compareList.length; i++) {
+          if (compareList[i] !== id) {
+            newList.push(compareList[i]);
+          }
+        }
+        compareList = newList;
+      }
+
+      updateCompareSection();
+    }
+
+    /* -------------------------------------------------------
+       10. UPDATE COMPARE SECTION
+       Shows or hides the comparison table at the bottom.
+       Only appears when exactly 2 locations are selected.
+    ------------------------------------------------------- */
+    function updateCompareSection() {
+      var section = document.getElementById('compareSection');
+      var table   = document.getElementById('compareTable');
+
+      // Hide the section if we don't have exactly 2 locations selected
+      if (compareList.length !== 2) {
+        section.style.display = 'none';
+        return;
+      }
+
+      // Find the two location objects by their id
+      var locA = null;
+      var locB = null;
+      for (var i = 0; i < locations.length; i++) {
+        if (locations[i].id === compareList[0]) locA = locations[i];
+        if (locations[i].id === compareList[1]) locB = locations[i];
+      }
+
+      // Build the comparison table HTML
+      table.innerHTML =
+        '<thead><tr>' +
+          '<th></th>' +
+          '<th>' + locA.name + '</th>' +
+          '<th>' + locB.name + '</th>' +
+        '</tr></thead>' +
+        '<tbody>' +
+          '<tr><td>' + getText('type-lbl')  + '</td><td>' + getTypeLabel(locA.type)  + '</td><td>' + getTypeLabel(locB.type)  + '</td></tr>' +
+          '<tr><td>' + getText('dist-lbl')  + '</td><td>' + locA.distance + ' km'    + '</td><td>' + locB.distance + ' km'    + '</td></tr>' +
+          '<tr><td>' + getText('wait-lbl')  + '</td><td>' + locA.waitTime            + '</td><td>' + locB.waitTime            + '</td></tr>' +
+          '<tr><td>' + getText('langs-lbl') + '</td><td>' + locA.languages.join(', ')+ '</td><td>' + locB.languages.join(', ')+ '</td></tr>' +
+          '<tr><td>' + getText('access-lbl')+ '</td><td>' + locA.accessibility.map(getAccessLabel).join(', ') + '</td><td>' + locB.accessibility.map(getAccessLabel).join(', ') + '</td></tr>' +
+          '<tr><td>' + getText('phone-lbl') + '</td><td>' + locA.phone              + '</td><td>' + locB.phone              + '</td></tr>' +
+        '</tbody>';
+
+      // Show the section and scroll to it
+      section.style.display = 'block';
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* -------------------------------------------------------
+       11. LANGUAGE SWITCHING
+       Updates every element that has a data-i18n attribute
+       with the translated text for the new language.
+    ------------------------------------------------------- */
+    function setLang(lang) {
+      currentLang = lang;
+
+      // Update which language button looks "active"
+      var buttons = document.querySelectorAll('.lang-btn');
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('active');
+      }
+      // Find the button for the chosen language and highlight it
+      var allBtns = document.querySelectorAll('.lang-btn');
+      for (var i = 0; i < allBtns.length; i++) {
+        if (allBtns[i].getAttribute('onclick') === "setLang('" + lang + "')") {
+          allBtns[i].classList.add('active');
+        }
+      }
+
+      // Update every element that has a data-i18n="someKey" attribute
+      var textEls = document.querySelectorAll('[data-i18n]');
+      for (var i = 0; i < textEls.length; i++) {
+        var key = textEls[i].getAttribute('data-i18n');
+        textEls[i].textContent = getText(key);
+      }
+
+      // Update placeholder text (input fields use data-i18n-ph instead)
+      var phEls = document.querySelectorAll('[data-i18n-ph]');
+      for (var i = 0; i < phEls.length; i++) {
+        var key = phEls[i].getAttribute('data-i18n-ph');
+        phEls[i].placeholder = getText(key);
+      }
+
+      // Re-draw the table with the new language
+      applyFilters();
+    }
+
+    /* -------------------------------------------------------
+       12. START THE APP
+       This line runs when the page loads.
+       It draws the full table with all 8 locations.
+    ------------------------------------------------------- */
+    renderTable(locations);
+
+  </script>
+</body>
+</html>
+
